@@ -1,0 +1,51 @@
+{
+  "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
+  "private": true,
+  "devDependencies": {
+    "babel-preset-react-native": "^2.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.8.0",
+    "eslint-plugin-node": "^5.2.1",
+    "eslint-plugin-promise": "^3.6.0",
+    "eslint-plugin-standard": "^3.0.1",
+    "jest-expo": "^22.0.0",
+    "react-native-scripts": "1.7.0",
+    "react-test-renderer": "16.0.0-beta.5"
+  },
+  "scripts": {
+    "start": "react-native-scripts start",
+    "eject": "react-native-scripts eject",
+    "android": "react-native-scripts android",
+    "ios": "react-native-scripts ios",
+    "test": "node node_modules/jest/bin/jest.js --watch"
+  },
+  "jest": {
+    "preset": "jest-expo"
+  },
+  "dependencies": {
+    "apollo-cache-inmemory": "^1.1.1",
+    "apollo-client": "^2.0.3",
+    "apollo-link": "^1.0.3",
+    "apollo-link-http": "^1.2.0",
+    "apollo-link-ws": "^1.0.1",
+    "babel-preset-expo": "^4.0.0",
+    "eslint": "^4.11.0",
+    "expo": "^23.0.0",
+    "flow": "^0.2.3",
+    "graphql": "^0.11.7",
+    "graphql-tag": "^2.5.0",
+    "lodash": "^4.17.4",
+    "moment": "^2.19.2",
+    "react": "16.0.0-beta.5",
+    "react-apollo": "^2.0.1",
+    "react-native": "https://github.com/expo/react-native/archive/sdk-23.0.0.tar.gz",
+    "react-native-vector-icons": "^4.4.2",
+    "react-navigation": "^1.0.0-beta.19",
+    "react-redux": "^5.0.6",
+    "redux": "^3.7.2",
+    "redux-actions": "^2.2.1",
+    "redux-thunk": "^2.2.0",
+    "subscriptions-transport-ws": "^0.9.1",
+    "thunk": "^0.0.1"
+  }
+}

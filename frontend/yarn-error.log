@@ -1,0 +1,77 @@
+Arguments: 
+  /Users/Djiffit/.nvm/versions/node/v9.2.0/bin/node /usr/local/bin/yarn
+
+PATH: 
+  /Users/Djiffit/.nvm/versions/node/v9.2.0/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:/usr/local/go/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands
+
+Yarn version: 
+  0.27.5
+
+Node version: 
+  9.2.0
+
+Platform: 
+  darwin x64
+
+npm manifest: 
+  {
+    "main": "node_modules/expo/AppEntry.js",
+    "private": true,
+    "devDependencies": {
+      "babel-preset-react-native": "^2.0.0",
+      "eslint-config-standard": "^10.2.1",
+      "eslint-plugin-import": "^2.8.0",
+      "eslint-plugin-node": "^5.2.1",
+      "eslint-plugin-promise": "^3.6.0",
+      "eslint-plugin-standard": "^3.0.1",
+      "jest-expo": "^22.0.0",
+      "react-native-scripts": "1.7.0",
+      "react-test-renderer": "16.0.0-beta.5"
+    },
+    "main": "./node_modules/react-native-scripts/build/bin/crna-entry.js",
+    "scripts": {
+      "start": "react-native-scripts start",
+      "eject": "react-native-scripts eject",
+      "android": "react-native-scripts android",
+      "ios": "react-native-scripts ios",
+      "test": "node node_modules/jest/bin/jest.js --watch"
+    },
+    "jest": {
+      "preset": "jest-expo"
+    },
+    "dependencies": {
+      "apollo-cache-inmemory": "^1.1.1",
+      "apollo-client": "^2.0.3",
+      "apollo-link-http": "^1.2.0",
+      "eslint": "^4.11.0",
+      "expo": "^22.0.2",
+      "flow": "^0.2.3",
+      "graphql": "^0.11.7",
+      "graphql-tag": "^2.5.0",
+      "lodash": "^4.17.4",
+      "moment": "^2.19.2",
+      "react": "16.0.0-beta.5",
+      "react-apollo": "^2.0.1",
+      "react-native": "^0.49.5",
+      "react-native-vector-icons": "^4.4.2",
+      "react-navigation": "^1.0.0-beta.19",
+      "react-redux": "^5.0.6",
+      "redux": "^3.7.2",
+      "redux-actions": "^2.2.1",
+      "redux-thunk": "^2.2.0",
+      "thunk": "^0.0.1"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile
+
+Trace: 
+  Error: https://registry.yarnpkg.com/flow: ETIMEDOUT
+      at Timeout._onTimeout (/usr/local/Cellar/yarn/0.27.5/libexec/lib/yarn-cli.js:114906:19)
+      at ontimeout (timers.js:478:11)
+      at tryOnTimeout (timers.js:302:5)
+      at Timer.listOnTimeout (timers.js:262:5)
