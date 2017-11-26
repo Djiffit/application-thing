@@ -96,11 +96,53 @@ class ChatsScreen extends Component {
         header: null,
     }
 
+    state = {
+      subscribed: false,
+    }
 
-  componentWillMount() {
-      this.props.subscribeToMessages({
-          groupIds: this.props.chats && this.props.chats.map(chat => chat.id),
-      })
+
+  componentWillReceiveProps(newProps) {
+        // if (newProps.chats && this.subscribeToMessages && this.subscribeToChats) {
+        //   this.subscribeToMessages(newProps.chats.map(chat => chat.id))
+        //   this.subscribeToChats()
+        // }
+        // if (newProps.chats && this.props.chats && newProps.chats.length !== this.props.chats.length || this.props.user.id !== newProps.user.id) {
+        //   if (typeof this.subscribeToMessages === 'function') {
+        //     this.subscribeToMessages()
+        //   }
+        //   if (newProps.chats.length) {
+        //     this.subscribeToMessages = newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
+        //   }
+        // }
+        // if (this.props.user.id !== newProps.user.id) {
+        //   if (typeof this.subscribeToChats === 'function') {
+        //     this.subscribeToChats()
+        //     this.subscribeToChats = newProps.subscribeToChats()
+        //   }
+        // }
+
+      if (newProps.subscribeToMessages && newProps.chats && (!this.subscribeMessages || !this.props.chats || newProps.chats.length !== this.props.chats.length)) {
+          if (!this.subscribeMessages) {
+            console.log('new messages sub')
+            this.subscribeMessages = newProps.subscribeToMessages
+            this.subscribeMessages(newProps.chats.map(chat => chat.id))
+          } else {
+            console.log('renew messages')
+            this.props.subscribeToMessages && this.props.subscribeToMessages()
+            newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
+          }
+      }
+      if (newProps.user.id !== this.props.user.id || !this.chatSubscription) {
+        if (!this.chatSubscription) {
+          console.log('new chats sub')
+          this.chatSubscription = newProps.subscribeToChats
+          this.chatSubscription()
+        } else {
+          console.log('renew chats')
+          this.chatSubsription && this.chatSubsription()
+          newProps.subscribeToChats()
+        }
+      }
   }
 
   async onSubmit () {
@@ -120,7 +162,7 @@ class ChatsScreen extends Component {
   keyExtractor = (item, index) => item.id
 
   renderChatItem(chat) {
-    const lastMessage = chat.lastMessage
+    const lastMessage = chat.messages[0]
     return <TouchableHighlight onPress={() => this.onPress(chat) }> 
         <View style={styles.rowWrapper}> 
             <Image
@@ -149,13 +191,12 @@ class ChatsScreen extends Component {
 }
 
   render () {
-    console.log(this.props.user)
     return <View style={styles.container}>  
-        <FlatList
-            data={this.props.chats}
-            renderItem={(chat) => this.renderChatItem(chat.item)}
-            keyExtractor={this.keyExtractor}
-            />
+    <FlatList
+        data={this.props.chats}
+        renderItem={(chat) => this.renderChatItem(chat.item)}
+        keyExtractor={this.keyExtractor}
+        />  
     </View>
     
   }
@@ -168,6 +209,6 @@ const mapStateToProps = state => ({
 
 export default flowRight(
   connect(mapStateToProps),
-  withChats,
-  withMessageSubscription)
+  withChats
+)
 (ChatsScreen)

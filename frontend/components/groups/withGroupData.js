@@ -1,23 +1,54 @@
 import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
+import update from 'immutability-helper'
 
-const withGroupQuery = gql`
-query { 
-    groups {
+export const withGroupQuery = gql`
+query getGroups($userId: String) { 
+    groups(userId: $userId) {
         name
         id
         members {
             id
             name
         }
-        messages {
-            id
+    }
+}
+`
+
+const groupSubscription = gql`
+subscription groupSubscription {
+    groupCreated {
+        name
+        id
+        members {
+            id 
+            name
         }
     }
 }
 `
 export default graphql(withGroupQuery, {
-  props: ({ ownProps, data: {groups} }) => ({
-    groups
+options: (props) => ({
+    variables: {
+        userId: props.user.id
+    }
+    }),
+  props: ({ ownProps, data: {groups, subscribeToMore, loading} }) => ({
+    groups,
+    loading,
+    subscribeToGroups() {
+        return subscribeToMore({
+            document: groupSubscription,
+            updateQuery: (previousResult, { subscriptionData }) => {
+                const group = subscriptionData.data.groupCreated 
+                const groups = [group, ...previousResult.groups]
+                return update(previousResult, {
+                    groups : {
+                        $set: groups
+                    }
+                })
+            },
+        })
+    },
   })
 })

@@ -27,13 +27,12 @@ const GroupSchema = mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  messages: {
+    type: [{type: Number, ref: 'Message'}],
+  },
   members: {
       type: Array,
       default: [],
-  },
-  lastMessage: {
-    type: String,
-    ref: 'Message',
   },
 })
 

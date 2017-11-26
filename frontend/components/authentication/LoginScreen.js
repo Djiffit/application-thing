@@ -90,9 +90,9 @@ class LoginScreen extends Component {
         </Text>}
         <TextInput
           placeholder={'Username'}
+          underlineColorAndroid='transparent'
           style={styles.input}
           editable={!this.state.submitting}
-          underlineColorAndroid='transparent'
           blurOnSubmit={true}
           onSubmit={() => this.onSubmit()}
           onChangeText={((text) => this.setState({name: text}))}/>

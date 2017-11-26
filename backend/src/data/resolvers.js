@@ -14,20 +14,33 @@ const resolvers = {
         if (cursor) {
             const messages = await Messages.find({group: groupId, sentAt: {$lt: cursor}}).sort({sentAt: -1}).limit(limit)
             
-            return {messages, after: messages && messages.length === limit && messages[messages.length - 1].sentAt}
+            return messages
         } else {
             const messages = await Messages.find({group: groupId}).sort({sentAt: -1}).limit(limit)
-            return {messages, after: messages && messages.length === limit && messages[messages.length - 1].sentAt}
+            return messages
         }
     },
-    groups: async () => {
-        const group = await Groups.find()
+    groups: async (_, {userId}) => {
+        const group = await Groups.find({members: {$ne: userId}}).populate({
+            path: 'messages', 
+            options: {sort: {sentAt: -1}, limit: 2},
+        })        
+
         return group
     },
     chats: async (_, {userId}) => {
-        const groups = await Groups.find({members: userId})
-        
+        const groups = await Groups.find({members: userId}).populate({
+            path: 'messages', 
+            options: {sort: {sentAt: -1}, limit: 2},
+        })        
+
         return groups
+    },
+    userQuery: async (_, {userId}) => {
+        const limit = 1
+        const groups = await Groups.find({members: userId})
+
+        return '{groups}'
     },
   },
   Mutation: {
@@ -40,19 +53,22 @@ const resolvers = {
         args = {...args, sentAt: Date.now()}
         const group = await Groups.findById(args.group)
         const message = await Messages.create(args) 
-        group.lastMessage = message._id
+        group.messages.push(message._id)
         pubsub.publish('messageAdded', {messageAdded: message})        
         group.save()
         return message
     },
     createGroup: async (_, args) => {
-        args.lastActive = Date.now()
         const group = await Groups.create(args) 
+        pubsub.publish('groupCreated', {groupCreated: group})
         return group
     },
     joinGroup: async (_, {userId, groupId}) => {
         const user = await Users.findById(userId)
-        const group = await Groups.findById(groupId)
+        const group = await Groups.findById(groupId).populate({
+            path: 'messages', 
+            options: {sort: {sentAt: -1}, limit: 2},
+        })        
 
         pubsub.publish('groupJoined', {groupJoined: group, userId: userId})
 
@@ -73,24 +89,27 @@ const resolvers = {
       subscribe: withFilter(
         () => pubsub.asyncIterator('messageAdded'),
         ({messageAdded}, {groupIds}) => {
-            return true
+            return groupIds && groupIds.indexOf(messageAdded.group) !== -1
         }
       ),
     },
+    groupJoined: {
+        subscribe: withFilter(
+          () => pubsub.asyncIterator('groupJoined'),
+          ({userId}, params) => {
+              return params.userId === userId
+          }
+        ),
+      },
+      groupCreated: {
+        subscribe: withFilter(
+          () => pubsub.asyncIterator('groupCreated'),
+          () => {
+              return true
+          }
+        ),
+      },
   },
-//   Subscription: {
-//     messageAdded: {
-//       subscribe: withFilter(
-//         async () => pubsub.asyncIterator(`messageAdded`),
-//         async (message, {id}) => {
-//             // const user = await User.findById(id)
-//             // console.log(user.groups, message)
-//             // return user.groups.indexOf(message.group)
-//             return true
-//         }
-//       ),
-//     },
-//   },
   Message: {
     group: async ({group}) => {
         return await Groups.findById(group)
@@ -107,8 +126,10 @@ const resolvers = {
     },
   },
   Group: {
-      messages: async({_id}) => {
-          return await Messages.find({group: _id})
+      messages: async({messages}) => {
+          if (messages && messages[0] && messages[0].body) return messages
+          const msgs = await Promise.all(await messages.map(async (message) => await Messages.findById(message)))
+          return msgs
       },
       members: async(args) => {
           const group = await Groups.findById(args.id)
@@ -121,3 +142,13 @@ const resolvers = {
 }
 
 export default resolvers
+
+
+
+
+// match: {sentAt: {$lt: cursor || 9999999999999}},
+// .populate({
+//     path: 'messages', 
+//     options: {sort: {sentAt: -1}, limit},
+// })
+

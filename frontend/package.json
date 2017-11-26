@@ -34,6 +34,7 @@
     "flow": "^0.2.3",
     "graphql": "^0.11.7",
     "graphql-tag": "^2.5.0",
+    "immutability-helper": "^2.5.1",
     "lodash": "^4.17.4",
     "moment": "^2.19.2",
     "react": "16.0.0-beta.5",

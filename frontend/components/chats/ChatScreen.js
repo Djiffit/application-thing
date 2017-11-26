@@ -174,26 +174,33 @@ import {
     }
 
     send() {
-        console.log(this.state)
         const message = this.props.sendMessage({body:this.state.text, group: this.props.navigation.state.params.id, sender: this.props.user.id, name: this.props.user.name})
         this.textInput.clear()
         this.textInput.blur()
     }
 
     loadMoreMessages() {
-        if (this.props.messages.after) {
-            if (!this.state.fetchingMore) {
-                this.setState({fetchingMore: true})
-                this.props.fetchMore()
-                setTimeout(() => this.setState({fetchingMore: false}), 1000)
-            }
+        if (!this.state.fetchingMore) {
+            this.setState({fetchingMore: true})
+            this.props.fetchMore()
+            setTimeout(() => this.setState({fetchingMore: false}), 1000)
         }
     }
 
-    keyExtractor = (item, index) => item.id
+    findIndex = (chats, id) => {
+        let index
+        chats.forEach((chat, i) => {
+          if (chat.id === id) index = i
+        })
+        return index
+      }
+
+    keyExtractor = (item, index) => index
   
     render () {
       if (this.props.loading) return <Text> LOADING </Text>
+      const index = this.findIndex(this.props.chats, this.props.navigation.state.params.id)
+      console.log(this.props.chats[index] ? [...this.props.chats[index].messages, ...this.props.messages] : this.props.messages)
       return <KeyboardAvoidingView 
         behavior={'position'}
         contentContainerStyle={styles.container}
@@ -201,7 +208,7 @@ import {
         style={styles.container}>  
         
         <FlatList inverted
-            data={this.props.messages.messages}
+            data={this.props.chats[index] ? [...this.props.chats[index].messages, ...this.props.messages] : this.props.messages}
             keyExtractor={this.keyExtractor}
             onEndReached={() => this.loadMoreMessages()}
             onEndReachedThreshold={1}
@@ -211,8 +218,8 @@ import {
             <TextInput
                 placeholderTextColor={'#FA8072'}
                 style={styles.input}
+                ref={(ref) => { this.textInput = ref }}                
                 onSubmitEditing={() => this.send()}
-                ref={(ref) => { this.textInput = ref }}
                 onChangeText={text => this.setState({text})}
                 placeholder='What would you like to say?'
                 send={this.send}/>
@@ -240,7 +247,9 @@ import {
   
   export default flowRight(
     connect(mapStateToProps),
+    withChats,
     withChatMessages,
-    withChatMessageCreate)
+    withChatMessageCreate
+)
   (ChatScreen)
   

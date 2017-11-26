@@ -32,26 +32,28 @@ type Group {
     lastMessage: Message
 }
 
-type FetchMessages {
-    messages: [Message],
-    after: String,
+type UserData {
+    groups: [Group],
 }
 
 type Query {
-    messages(groupId: String, cursor: String, count: Int): FetchMessages
+    messages(groupId: String, cursor: String, count: Int): [Message]
     group(groupId: String): Group
-    groups: [Group]
+    groups(userId: String): [Group]
     chats(userId: String): [Group]
+    userQuery(userId: String): String
 }
 
 type Mutation {
     createUser(name: String): User
     createMessage(body: String, group: String, sender: String): Message
-    createGroup(name: String, description: String): Group
+    createGroup(name: String, image: String): Group
     joinGroup(groupId: String, userId: String): Group
 }
 type Subscription {
     messageAdded(groupIds: [String]): Message
+    groupJoined(userId: String): Group
+    groupCreated: Group
   }
 `
 

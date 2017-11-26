@@ -3,10 +3,14 @@ import {View,
     TouchableHighlight,
      Text, 
      FlatList,
+     Button,
+     TextInput,
      Image,
+     Modal,
     StyleSheet} from 'react-native'
 import withGroupData from './withGroupData'
 import withGroupJoin from './withGroupJoin'
+import withGroupCreate from './withGroupCreate'
 import flowRight from 'lodash/flowRight'
 import {connect} from 'react-redux'
 import Icon from 'react-native-vector-icons/FontAwesome'
@@ -19,11 +23,26 @@ const styles = StyleSheet.create({
     container: {
         marginTop: 20,
     },
+    modalInput: {
+        width: '80%',
+        alignSelf: 'center',
+        height: 35,
+        fontSize: 16,
+        marginBottom: 50,
+        color: '#e7e7e7',
+        backgroundColor: '#2a3439',
+        borderRadius: 10,
+        paddingLeft: 20,
+    },
     extraData: {
         fontSize: 9,
         marginLeft: 5,
         color: 'grey',
         flex: 0.1
+    },
+    modalButton: {
+        justifyContent: 'center',
+        alignSelf: 'center',
     },
     title: {
       flex: 0.9,
@@ -37,7 +56,9 @@ const styles = StyleSheet.create({
       marginRight: 5,
     },
     button: {
-      width: '40%',
+        alignSelf: 'flex-end',
+        fontSize: 10,
+        flex: 0.1,
     },
     rowSplitter: {
         flex: 1,
@@ -52,6 +73,41 @@ const styles = StyleSheet.create({
         marginLeft: 5,
         marginRight: 10,
     },
+    listHeader: {
+        height: 40,
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        flex: 1,
+        width: '100%',
+        position: 'absolute',
+        borderStyle: 'solid',
+        borderBottomColor: 'darkgrey',
+        borderBottomWidth: 2,
+    },
+    plusIcon: {
+        alignSelf: 'center',
+    },
+    headerText: {
+        fontSize: 17,
+        color: '#FA8072',
+        alignSelf: 'center',
+        paddingTop: 2,
+        fontWeight: 'bold',
+        flex: 0.6,
+    },
+    padding: {
+        paddingTop: 40,
+    },
+    newText: {
+        fontSize: 16,
+        color: '#FA8072',
+        marginRight: 5,
+    },
+    newWrapper: {
+        alignItems: 'center',
+        flex: 1,
+        flexDirection: 'row',
+    },
     rowWrapper: {
         flex: 1,
         flexDirection: 'row',
@@ -60,12 +116,22 @@ const styles = StyleSheet.create({
         borderBottomColor: '#eee',
         borderBottomWidth: 1,
         paddingVertical: 8,
-    }
+    },
   })
 
 class GroupsScreen extends Component {
     static navigationOptions = {
         title: 'Groups',
+    }
+
+    state = {
+        modalVisible: false,
+        name: '',
+        image: ''
+    }
+
+    componentWillMount() {
+        this.props.subscribeToGroups()
     }
 
     async onPress(group) {
@@ -91,7 +157,7 @@ class GroupsScreen extends Component {
                         <View style={styles.joinIconWrapper}>
                             <Icon 
                                 name={'angle-right'}
-                                size={30}
+                                size={25}
                                 style={{ marginRight: 9 }}
                                 color={'#FA8072'}
                             />
@@ -100,9 +166,80 @@ class GroupsScreen extends Component {
             </View> 
         </TouchableHighlight>
     }
+    
+    renderHeader() { 
+        return <TouchableHighlight style={styles.listHeader} onPress={() => this.setState({modalVisible: true})}> 
+             <View style={styles.listHeader}><Text style={styles.headerText}>  Groups listing </Text>
+             <View>
+             <View style={styles.newWrapper}>
+                <Text style={styles.newText}>
+                New
+                </Text>
+                 <View style={styles.plusIcon}> 
+                    <Icon 
+                    name={'plus-circle'}
+                    size={15}
+                    style={{ marginRight: 9 }}
+                    color={'#FA8072'}
+                        />
+                 </View>
+            </View>
+            </View></View>
+        </TouchableHighlight>
+    }
+
+    createGroup() {
+        console.log(this.state)
+        this.props.createGroup({name: this.state.name, image: this.state.image, userId: this.props.user.id})
+        this.nameTextInput.clear()
+        this.nameTextInput.blur()
+        this.imageTextInput.clear()
+        this.imageTextInput.blur()
+        this.setState({modalVisible: false})
+    }
 
     render() {
         return <View style={styles.container}>  
+            <View style={styles.padding}/>
+        {this.renderHeader()}
+        
+            <Modal
+            animationType='fade'
+            transparent={true}
+            visible={this.state.modalVisible}
+            onRequestClose={() => {alert("Modal has been closed.")}}
+            >
+            <View style={{flex: 1, flexDirection: 'row', justifyContent: 'center',  backgroundColor: 'rgba(0, 0, 0, 0.5)'}}>
+                <View style={{height: 350, width: 300, backgroundColor: 'white', borderRadius: 20, flexDirection: 'column', marginTop: 50}}>
+                <Text style={{alignSelf: 'center', paddingTop: 10, fontSize: 20, fontWeight: 'bold', marginBottom: 40}}>New Group</Text>
+    
+                <TextInput 
+                    placeholder={'Name'}
+                    underlineColorAndroid='transparent'
+                    style={styles.modalInput}
+                    placeholderTextColor={'#FA8072'}
+                    ref={(ref) => { this.nameTextInput = ref }}
+                    onChangeText={((text) => this.setState({name: text}))}
+                />
+                <TextInput
+                    placeholder={'Image'}
+                    underlineColorAndroid='transparent'
+                    style={styles.modalInput}
+                    placeholderTextColor={'#FA8072'}
+                    ref={(ref) => { this.imageTextInput = ref }}
+                    onChangeText={((text) => this.setState({image: text}))}
+                />
+                <View style={{flexDirection: 'row', marginTop: 40}}>
+                <TouchableHighlight style={{flex: 0.5}} onPress={() => this.setState({modalVisible: false})}>
+                    <Text style={styles.modalButton}>Cancel</Text>
+                </TouchableHighlight>
+                <TouchableHighlight style={{flex: 0.5}} onPress={() => this.createGroup()}>
+                    <Text style={styles.modalButton}>Create</Text>
+                </TouchableHighlight>
+                </View>
+                </View>
+                </View>
+          </Modal>
             <FlatList
                 data={this.props.groups}
                 renderItem={(group) => this.renderGroupItem(group.item)}
@@ -116,4 +253,4 @@ const mapStateToProps = state => ({
     user: state.user.user
   })
 
-export default flowRight(connect(mapStateToProps), withGroupData, withGroupJoin)(GroupsScreen)
+export default flowRight(connect(mapStateToProps), withGroupData, withGroupCreate, withGroupJoin)(GroupsScreen)

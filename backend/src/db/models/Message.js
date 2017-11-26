@@ -1,6 +1,7 @@
 // @flow
 
 import mongoose from 'mongoose'
+const autoIncrement = require('mongoose-sequence')(mongoose)
 
 type BaseMessage = {
   sender: string,
@@ -14,6 +15,9 @@ export type UpsertPost = BaseMessage & {
 }
 
 const MessageSchema = mongoose.Schema({
+  _id: {
+    type: Number,
+  },
   sender: {
     type: String,
     required: true,
@@ -29,6 +33,8 @@ const MessageSchema = mongoose.Schema({
   sentAt: {
       type: String,
   },
-})
+}, {_id: false})
+
+MessageSchema.plugin(autoIncrement, {inc_field: '_id'})
 
 export default mongoose.model('Message', MessageSchema)

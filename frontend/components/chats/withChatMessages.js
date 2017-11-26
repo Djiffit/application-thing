@@ -4,7 +4,6 @@ import {graphql} from 'react-apollo'
 export const withChatQuery = gql`
 query getChatMessages($groupId: String, $count: Int, $cursor: String) { 
     messages(groupId: $groupId, count: $count, cursor: $cursor) {
-        messages {
             id
             body
             sender {
@@ -12,8 +11,7 @@ query getChatMessages($groupId: String, $count: Int, $cursor: String) {
                 id
             }
             sentAt
-        }
-        after
+
     }
 }
 `
@@ -22,6 +20,7 @@ export default graphql(withChatQuery, {
   options: (props) => ({
     variables: {
       groupId: props.navigation.state.params.id,
+      cursor: props.navigation.state.params.messages && props.navigation.state.params.messages.length !== 0 && props.navigation.state.params.messages[props.navigation.state.params.messages.length - 1].sentAt,
       count: 20
     }
   }),
@@ -30,17 +29,17 @@ export default graphql(withChatQuery, {
     loading,
     fetchMore: () => fetchMore({
       variables: {
-        cursor: messages.after
+        cursor: messages && messages.length !== 0 && messages[messages.length - 1].sentAt
       },
       updateQuery: (previousResult, {fetchMoreResult}) => {
-        if (!fetchMoreResult || !fetchMoreResult.messages || !fetchMoreResult.messages.messages) {
+        if (!fetchMoreResult || !fetchMoreResult.messages || !fetchMoreResult.messages) {
           return previousResult
         }
-        let returnObject = {messages: {messages: [...previousResult.messages.messages], after: fetchMoreResult.messages.after}}
-        fetchMoreResult.messages.messages.forEach((message) => {
-            if (!returnObject.messages.messages.some(msg => msg.id === message.id)) returnObject.messages.messages.push(message)
+        let returnObject = [...previousResult.messages]
+        fetchMoreResult.messages.forEach((message) => {
+            if (!returnObject.some(msg => msg.id === message.id)) returnObject.push(message)
         })
-        return returnObject
+        return {messages: returnObject}
       }
     })
   })

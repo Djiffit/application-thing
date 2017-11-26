@@ -1,6 +1,8 @@
+// @flow
 import {graphql} from 'react-apollo'
 import gql from 'graphql-tag'
-import {withChatQuery} from './withChatMessages'
+import {withChatQuery} from './withChats'
+import update from 'immutability-helper'
 
 const messageCreateMutation = gql`
 mutation createMessage($group: String, $body: String, $sender: String) {
@@ -39,26 +41,42 @@ graphql(messageCreateMutation, {
             }
           }
         },
-        update: (store, {data: {createMessage}}) => {
-          const data = store.readQuery({
-            query: withChatQuery,
-            variables: {
-              groupId: group,
-              count: 20
-            }
-          })
-          console.log(data)
-          data.messages.messages.unshift(createMessage)
-          console.log(data)
-          store.writeQuery({
-            query: withChatQuery,
-            variables: {
-              groupId: group,
-              count: 20
-            },
-            data
-          })
-        }
+        // update: (store, {data: {createMessage}}) => {
+        //   const data = store.readQuery({
+        //     query: withChatQuery,
+        //     variables: {
+        //       userId: sender
+        //     }
+        //   })
+        //   let messages
+        //   let index
+        //   data.chats.forEach((chat, i) => {
+        //     if (chat._id === createMessage.group) {
+        //       index = i
+        //       messages = [createMessage, ...chat.messages]
+        //     }
+        //   })
+        //   store.writeQuery({
+        //     query: withChatQuery,
+        //     variables: {
+        //       userId: sender
+        //     },
+        //     data: update(data, {
+        //       chats: {
+        //         [index]: {
+        //           messages: {$set: messages}
+        //         }
+        //       }
+        //     })
+        //   })
+        //   const d = store.readQuery({
+        //     query: withChatQuery,
+        //     variables: {
+        //       userId: sender
+        //     }
+        //   })
+        //   console.log(messages, index, d)
+        // }
       })
     }
   })

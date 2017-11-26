@@ -30,14 +30,12 @@ graphql(withChatQuery, {
     props: props => {
         return {
             subscribeToMessages: (things) => {
-                console.log(things)
                 return props.messages.subscribeToMore({
                     document: messageSubscription,
                     variables: {
                         groupIds: things.chats && things.chats.map(chat => chat.id),
                     },
                     update: (par, ar, met) => {
-                        console.log(par, ar, met)
                     }
                     // updateQuery: (prev, hello, hoo, hi) => {
                     //     console.log(hello, hoo, hi)
