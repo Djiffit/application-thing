@@ -12,7 +12,8 @@ import {
     RefreshControl,
     Button,
     ProgressIndicator,
-    TouchableNativeFeedback
+    TouchableNativeFeedback,
+    Animated
   } from 'react-native'
   import React, {Component} from 'react'
   import {connect} from 'react-redux'
@@ -28,6 +29,7 @@ import {
       width: 30,
       height: 30,
       borderRadius: 15,
+      marginLeft: 5,
       marginTop: 10,
     },
     container: {
@@ -128,6 +130,69 @@ import {
     }
   })
   
+  const ANIMATION_DURATION = 500
+  const ROW_HEIGHT = 100
+
+  class ListRow extends Component {
+      constructor(props) {
+          super(props)
+          this._animated = new Animated.Value(0)
+      }
+
+      componentDidMount() {
+          Animated.timing(this._animated, {
+              toValue: 1,
+              duration: ANIMATION_DURATION,
+          }).start()
+      }
+
+      render() {
+        const {message, currentUser} = this.props
+        const rowStyles = [
+            { opacity: this._animated },
+            {
+                transform: [
+                    { 
+                        translateX: this._animated.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [currentUser ? 300 : -300, 0],
+                        extrapolate: 'clamp',
+                    })
+                    },
+                    // { scale: this._animated },
+                    // {
+                    //     rotate: this._animated.interpolate({
+                    //         inputRange: [0,1],
+                    //         outputRange: ['90deg', '0deg'],
+                    //         extrapolate: 'clamp',
+                    //     })
+                    // }
+                ],
+            }
+            
+        ]
+        if (message) {
+            const image = <Image
+            style={styles.icon}
+            source={{uri: message.sender.image || 'https://images.duckduckgo.com/iu/?u=http%3A%2F%2Fimages.wikia.com%2Ffinalfantasy%2Fimages%2Farchive%2Fc%2Fc8%2F20111130214728%2521Vivi.jpg&f=1'}}
+        />
+        return (
+            <Animated.View style={rowStyles} >
+              <View style={styles.messageWrapper}>
+                {!currentUser && image}
+                <View style={[styles.message, currentUser ? styles.myMessage : styles.notMyMessage]}>
+                    <Text>{message.body}</Text>
+                </View>
+                {!currentUser && <View style={styles.titleBar}>
+                    <Text style={styles.timeStamp}>{moment(new Date(Number(message.sentAt))).calendar()}</Text>
+                </View>}
+                {currentUser && image}
+                </View>
+            </Animated.View>)
+        }
+      }
+  }
+
   class ChatScreen extends Component {
 
     state = {
@@ -150,33 +215,13 @@ import {
     }
 
     renderMessage(item) {
-        const message = item.item
-        if (message) {
-            const currentUser = message.sender.id === this.props.user.id
-            const image = <Image
-            style={styles.icon}
-            source={{uri: message.sender.image || 'https://images.duckduckgo.com/iu/?u=http%3A%2F%2Fimages.wikia.com%2Ffinalfantasy%2Fimages%2Farchive%2Fc%2Fc8%2F20111130214728%2521Vivi.jpg&f=1'}}
-        />
-        return (
-            <View>
-              <View style={styles.messageWrapper}>
-                {!currentUser && image}
-                <View style={[styles.message, currentUser ? styles.myMessage : styles.notMyMessage]}>
-                    <Text>{message.body}</Text>
-                </View>
-                {!currentUser && <View style={styles.titleBar}>
-                    <Text style={styles.timeStamp}>{moment(new Date(Number(message.sentAt))).calendar()}</Text>
-                </View>}
-                {currentUser && image}
-                </View>
-            </View>)
-        }
+        return <ListRow message={item.item} currentUser={item.item.sender.id === this.props.user.id} />
     }
 
     send() {
-        const message = this.props.sendMessage({body:this.state.text, group: this.props.navigation.state.params.id, sender: this.props.user.id, name: this.props.user.name})
         this.textInput.clear()
         this.textInput.blur()
+        const message = this.props.sendMessage({body:this.state.text, group: this.props.navigation.state.params.id, sender: this.props.user.id, name: this.props.user.name})
     }
 
     loadMoreMessages() {
@@ -195,12 +240,25 @@ import {
         return index
       }
 
-    keyExtractor = (item, index) => index
-  
+    keyExtractor = (item, index) => item.id
+
     render () {
       if (this.props.loading) return <Text> LOADING </Text>
-      const index = this.findIndex(this.props.chats, this.props.navigation.state.params.id)
-      console.log(this.props.chats[index] ? [...this.props.chats[index].messages, ...this.props.messages] : this.props.messages)
+      const index = this.props.chats && this.findIndex(this.props.chats, this.props.navigation.state.params.id)
+      const data = index !== false && index !== undefined ? this.props.chats[index] ? [...this.props.chats[index].messages, ...this.props.messages] : this.props.messages : []
+    
+      const ids = {}
+      data.map(message => ids[message.id] = 1)
+      
+      const filteredData = data.filter((message) => {
+          if (ids[message.id] !== 1) return false
+          else {
+              ids[message.id] = 0
+              return true
+          }
+      })
+
+      console.log(data)
       return <KeyboardAvoidingView 
         behavior={'position'}
         contentContainerStyle={styles.container}
@@ -208,7 +266,7 @@ import {
         style={styles.container}>  
         
         <FlatList inverted
-            data={this.props.chats[index] ? [...this.props.chats[index].messages, ...this.props.messages] : this.props.messages}
+            data={filteredData}
             keyExtractor={this.keyExtractor}
             onEndReached={() => this.loadMoreMessages()}
             onEndReachedThreshold={1}

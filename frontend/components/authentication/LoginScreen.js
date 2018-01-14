@@ -72,9 +72,8 @@ class LoginScreen extends Component {
     if (this.state.name.length > 3) {
       const user = await this.props.submit({name: this.state.name})
       this.props.signIn(user)
-    } else {
-     this.setState({submitting: false})
-    }
+    } 
+    this.setState({submitting: false})
   }
 
   render () {

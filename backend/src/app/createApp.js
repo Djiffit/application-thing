@@ -28,7 +28,8 @@ export default async (): Promise<$Application> => {
   const port = process.env.PORT || 3000
 
   app.use('/graphql', bodyParser.json(), graphqlExpress({schema}))
-  app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql', subscriptionsEndpoint: `ws://localhost:3000/subscriptions`}))
+  app.use('/graphiql', graphiqlExpress({endpointURL: '/graphql',
+                    subscriptionsEndpoint: `ws://localhost:3000/subscriptions`}))
 
   createEndpoints(app)
   const ws = createServer(app)
@@ -43,7 +44,6 @@ export default async (): Promise<$Application> => {
       path: '/subscriptions',
     })
   })
-
   
   return app
 }

@@ -102,43 +102,19 @@ class ChatsScreen extends Component {
 
 
   componentWillReceiveProps(newProps) {
-        // if (newProps.chats && this.subscribeToMessages && this.subscribeToChats) {
-        //   this.subscribeToMessages(newProps.chats.map(chat => chat.id))
-        //   this.subscribeToChats()
-        // }
-        // if (newProps.chats && this.props.chats && newProps.chats.length !== this.props.chats.length || this.props.user.id !== newProps.user.id) {
-        //   if (typeof this.subscribeToMessages === 'function') {
-        //     this.subscribeToMessages()
-        //   }
-        //   if (newProps.chats.length) {
-        //     this.subscribeToMessages = newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
-        //   }
-        // }
-        // if (this.props.user.id !== newProps.user.id) {
-        //   if (typeof this.subscribeToChats === 'function') {
-        //     this.subscribeToChats()
-        //     this.subscribeToChats = newProps.subscribeToChats()
-        //   }
-        // }
-
       if (newProps.subscribeToMessages && newProps.chats && (!this.subscribeMessages || !this.props.chats || newProps.chats.length !== this.props.chats.length)) {
           if (!this.subscribeMessages) {
-            console.log('new messages sub')
-            this.subscribeMessages = newProps.subscribeToMessages
-            this.subscribeMessages(newProps.chats.map(chat => chat.id))
+            this.subscribeMessages = newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
           } else {
-            console.log('renew messages')
-            this.props.subscribeToMessages && this.props.subscribeToMessages()
-            newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
+            this.subscribeMessages()
+            this.subscribeMessages = newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
           }
       }
       if (newProps.user.id !== this.props.user.id || !this.chatSubscription) {
         if (!this.chatSubscription) {
-          console.log('new chats sub')
           this.chatSubscription = newProps.subscribeToChats
           this.chatSubscription()
         } else {
-          console.log('renew chats')
           this.chatSubsription && this.chatSubsription()
           newProps.subscribeToChats()
         }
@@ -212,3 +188,26 @@ export default flowRight(
   withChats
 )
 (ChatsScreen)
+
+
+
+
+
+        // if (newProps.chats && this.subscribeToMessages && this.subscribeToChats) {
+        //   this.subscribeToMessages(newProps.chats.map(chat => chat.id))
+        //   this.subscribeToChats()
+        // }
+        // if (newProps.chats && this.props.chats && newProps.chats.length !== this.props.chats.length || this.props.user.id !== newProps.user.id) {
+        //   if (typeof this.subscribeToMessages === 'function') {
+        //     this.subscribeToMessages()
+        //   }
+        //   if (newProps.chats.length) {
+        //     this.subscribeToMessages = newProps.subscribeToMessages(newProps.chats.map(chat => chat.id))
+        //   }
+        // }
+        // if (this.props.user.id !== newProps.user.id) {
+        //   if (typeof this.subscribeToChats === 'function') {
+        //     this.subscribeToChats()
+        //     this.subscribeToChats = newProps.subscribeToChats()
+        //   }
+        // }

@@ -1,5 +1,3 @@
-// @flow
-
 import Groups from '../db/models/Group'
 import Messages from '../db/models/Message'
 import Users from '../db/models/User'
@@ -13,35 +11,34 @@ const resolvers = {
         const limit = count || 10
         if (cursor) {
             const messages = await Messages.find({group: groupId, sentAt: {$lt: cursor}}).sort({sentAt: -1}).limit(limit)
-            
             return messages
         } else {
             const messages = await Messages.find({group: groupId}).sort({sentAt: -1}).limit(limit)
             return messages
         }
     },
-    groups: async (_, {userId}) => {
+    groups: async (_, {userId, numMessages}) => {
         const group = await Groups.find({members: {$ne: userId}}).populate({
             path: 'messages', 
-            options: {sort: {sentAt: -1}, limit: 2},
+            options: {sort: {sentAt: -1}, limit: numMessages || 1},
         })        
 
         return group
     },
-    chats: async (_, {userId}) => {
+    chats: async (_, {userId, numMessages}) => {
         const groups = await Groups.find({members: userId}).populate({
             path: 'messages', 
-            options: {sort: {sentAt: -1}, limit: 2},
+            options: {sort: {sentAt: -1}, limit: numMessages},
         })        
 
         return groups
     },
-    userQuery: async (_, {userId}) => {
-        const limit = 1
-        const groups = await Groups.find({members: userId})
+    // userQuery: async (_, {userId}) => {
+    //     const limit = 1
+    //     const groups = await Groups.find({members: userId})
 
-        return '{groups}'
-    },
+    //     return '{groups}'
+    // },
   },
   Mutation: {
     createUser: async (root, {name}) => {
@@ -67,7 +64,7 @@ const resolvers = {
         const user = await Users.findById(userId)
         const group = await Groups.findById(groupId).populate({
             path: 'messages', 
-            options: {sort: {sentAt: -1}, limit: 2},
+            options: {sort: {sentAt: -1}, limit: 1},
         })        
 
         pubsub.publish('groupJoined', {groupJoined: group, userId: userId})
@@ -114,9 +111,8 @@ const resolvers = {
     group: async ({group}) => {
         return await Groups.findById(group)
     },
-    sender: async (args) => {
-        const user = await Users.findById(args.sender)
-        return user
+    sender: async ({sender}) => {
+        return await Users.findById(sender)
     },
   },
   User: {
@@ -142,13 +138,3 @@ const resolvers = {
 }
 
 export default resolvers
-
-
-
-
-// match: {sentAt: {$lt: cursor || 9999999999999}},
-// .populate({
-//     path: 'messages', 
-//     options: {sort: {sentAt: -1}, limit},
-// })
-

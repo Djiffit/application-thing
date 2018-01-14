@@ -4,14 +4,13 @@ import {graphql} from 'react-apollo'
 export const withChatQuery = gql`
 query getChatMessages($groupId: String, $count: Int, $cursor: String) { 
     messages(groupId: $groupId, count: $count, cursor: $cursor) {
-            id
-            body
-            sender {
-                name
-                id
-            }
-            sentAt
-
+      id
+      body
+      sender {
+          name
+          id
+      }
+      sentAt
     }
 }
 `
@@ -32,7 +31,7 @@ export default graphql(withChatQuery, {
         cursor: messages && messages.length !== 0 && messages[messages.length - 1].sentAt
       },
       updateQuery: (previousResult, {fetchMoreResult}) => {
-        if (!fetchMoreResult || !fetchMoreResult.messages || !fetchMoreResult.messages) {
+        if (!fetchMoreResult || !fetchMoreResult.messages) {
           return previousResult
         }
         let returnObject = [...previousResult.messages]

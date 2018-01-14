@@ -93,7 +93,6 @@ const ChatsNavigator = StackNavigator({
 const AppNavigator = TabNavigator({
   Chats: {screen: ChatsNavigator},
   Groups: {screen: GroupsNavigator},
-  Friends: {screen: TestScreen('Friends')},
   Settings: {screen: LoginScreen}
 },
 {

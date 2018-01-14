@@ -2,19 +2,19 @@ import gql from 'graphql-tag'
 import {graphql} from 'react-apollo'
 import update from 'immutability-helper'
 
-export const withChatQuery = gql`
-query getChats($userId: String) { 
-    chats(userId: $userId) {
-        name
-        id
-        messages {
-          body
-          sender {
-            name
-            id
-          }
-          sentAt
+const chatSubscription = gql`
+subscription groupJoined($userId: String) {
+    groupJoined(userId: $userId) {
+      name
+      id
+      messages {
+        body
+        sender {
+          name
+          id
         }
+        sentAt
+      }
     }
 }`
 
@@ -35,19 +35,20 @@ subscription messageAdded($groupIds: [String]) {
     }
 }`
 
-const chatSubscription = gql`
-subscription groupJoined($userId: String) {
-    groupJoined(userId: $userId) {
-      name
-      id
-      messages {
-        body
-        sender {
-          name
+export const withChatQuery = gql`
+query getChats($userId: String) { 
+    chats(userId: $userId) {
+        name
+        id
+        messages {
+          body
+          sender {
+            name
+            id
+          }
+          sentAt
           id
         }
-        sentAt
-      }
     }
 }`
 
@@ -65,8 +66,7 @@ export default graphql(withChatQuery, {
           document: messageSubscription,
           variables: {groupIds},
           updateQuery: (previousResult, { subscriptionData }) => {
-              const message = subscriptionData.data.messageAdded
-              // if (ownProps.user.id === message.sender.id) return previousResult              
+              const message = subscriptionData.data.messageAdded       
               let index
               let messages
               previousResult.chats.forEach((chat, i) => {
@@ -86,7 +86,6 @@ export default graphql(withChatQuery, {
       })
   },
   subscribeToChats() {
-    console.log('sub')
     return subscribeToMore({
         document: chatSubscription,
         variables: {userId: ownProps.user.id},
@@ -100,7 +99,17 @@ export default graphql(withChatQuery, {
             })
         },
     })
-},
+  },
+  })
+})
+
+
+
+
+
+
+
+
   // subscribeToGroups() {
   //     console.log('hello?')
   //     return subscribeToMore({
@@ -124,5 +133,3 @@ export default graphql(withChatQuery, {
   //         },
   //     });
   // },
-  })
-})

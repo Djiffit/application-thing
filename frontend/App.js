@@ -15,45 +15,39 @@ import thunk from 'redux-thunk'
 import {getOperationAST} from 'graphql'
 import {SubscriptionClient, addGraphQLSubscriptions} from 'subscriptions-transport-ws'
 
-const httpUri = 'http://localhost:3000/graphql'
-const wsUri = 'ws://localhost:3000/subscriptions'
+const httpUri = 'http://localhost:3000/graphql' // Configure GraphQL endpoint
+const wsUri = 'ws://localhost:3000/subscriptions' // Configure WebSocket endpoint
 
-// const wsClient = new SubscriptionClient(`ws://localhost:4000/subscriptions`, {
-//   reconnect: true,
-// })
-const httpLink = new HttpLink({
-  uri: httpUri,
-})
-
-const link = ApolloLink.split(
+const link = ApolloLink.split( // Link needs to split since we have both websockets and normal graphql connection
   operation => {
-    const operationAST = getOperationAST(operation.query, operation.operationName);
-    return !!operationAST && operationAST.operation === 'subscription';
+    const operationAST = getOperationAST(operation.query, operation.operationName)
+    return !!operationAST && operationAST.operation === 'subscription'
   },
-  new WebSocketLink({
+  new WebSocketLink({ // Create websocket link
     uri: wsUri,
     options: {
       reconnect: true, 
     }
   }),
-  new HttpLink({uri: httpUri})
+  new HttpLink({uri: httpUri}) // Create GraphQL link
 )
 
-const client = new ApolloClient({
+const client = new ApolloClient({ // Create ApolloClient with endpoints configured in the link and add the cache
   link,
   cache: new InMemoryCache({
-    dataIdFromObject: o => o.id
+    dataIdFromObject: o => o.id // How to identify data in cache
   }),
 })
 
-const store = createStore(
-  combineReducers({
+const store = createStore( // Configure redux store
+  combineReducers({ // What data is stored in the store
     nav: navigationReducer,
     user: UserReducer
   }),
-  applyMiddleware(thunk)
+  applyMiddleware(thunk) // Adding middleware
 )
 
+// Final component structure
 export default class App extends React.Component {
   render() {
     return (

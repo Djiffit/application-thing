@@ -189,7 +189,6 @@ class GroupsScreen extends Component {
     }
 
     createGroup() {
-        console.log(this.state)
         this.props.createGroup({name: this.state.name, image: this.state.image, userId: this.props.user.id})
         this.nameTextInput.clear()
         this.nameTextInput.blur()

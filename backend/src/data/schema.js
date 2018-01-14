@@ -12,13 +12,8 @@ type User {
     image: String
 }
 
-type Message {
-    id: String!
-    body: String!
-    group: Group!
-    sender: User!
-    location: String
-    sentAt: String
+type UserData {
+    groups: [Group],
 }
 
 type Group {
@@ -32,16 +27,21 @@ type Group {
     lastMessage: Message
 }
 
-type UserData {
-    groups: [Group],
+type Message {
+    id: String!
+    body: String!
+    group: Group!
+    sender: User!
+    location: String
+    sentAt: String
 }
+
 
 type Query {
     messages(groupId: String, cursor: String, count: Int): [Message]
     group(groupId: String): Group
-    groups(userId: String): [Group]
-    chats(userId: String): [Group]
-    userQuery(userId: String): String
+    groups(userId: String, numMessages: Int): [Group]
+    chats(userId: String, numMessages: Int): [Group]
 }
 
 type Mutation {
